@@ -9,6 +9,7 @@
 		#include <avr/interrupt.h>
 		#include <string.h>
 		#include <stdio.h>
+		#include <util/delay.h>
 
 		#include "Descriptors.h"
 
@@ -19,9 +20,9 @@
 
 		//keyboard mapping
 		PROGMEM prog_uchar charMap[] = {  
-		  'g', '#', 'f', 'e', '#', 'c', 'b', 'a', 't', 's', 
-		  'r', 'q', 'p', 'o', 'n', 'm', 'g', 'h', 'l', '5', 
-		  '4', '3', '2', '1', 'k', 'i', 'j', '6', '0', '*', 
+		  'a', '#', 'b', 'c', 'd', 'e', 'f', 'g', 'k', 'l', 
+		  'm', 'n', 'o', 'p', 'q', 'r', '5', '4', '3', '2', 
+		  '1', 'h', 'i', 'j', '6', '0', '*', '9', '8', '7', 
 		  '9', '8'};
 		#define CLOCKPIN PD2
 		#define DATAPIN PD3

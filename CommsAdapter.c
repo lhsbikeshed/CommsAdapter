@@ -84,10 +84,12 @@ int main(void)
 		//output keys that are different to last read
 		uint32_t btn = boardStatus(leds);
 		if(btn != lastButtonStatus){
+			
 			for(int i = 0; i < 32; i++){
-				uint8_t b = (btn & (1UL << i)) ? 1 : 0;
+
+				uint8_t b = ((btn >> i) & 1) ? 1 : 0;
 				uint8_t lb = (lastButtonStatus & (1UL << i)) ? 1 : 0;
-				if(b != lb && b){
+				if(lb != b && b){
 					char d = pgm_read_byte_near(charMap + i);
 					CDC_Device_SendByte(&VirtualSerial_CDC_Interface, d);
 				}
@@ -124,7 +126,9 @@ void SetupHardware(void)
 	DDRD &= ~(_BV(DATAPIN));
 	PORTD &= ~(_BV(DATAPIN));
 	PORTD &= ~(_BV(CLOCKPIN));
-	
+	PORTD &= ~(_BV(READPIN));
+	PORTD = 0;
+  
 }
 
 uint32_t boardStatus(unsigned long leds){
@@ -133,28 +137,30 @@ uint32_t boardStatus(unsigned long leds){
 
   //toggle the read pin
   PORTD |= _BV(READPIN);
-  for(int i = 0; i < 255; i++){}
+  _delay_us(10);
   PORTD &= ~(_BV(READPIN));
 
+  //set the led strobe pin high
   PORTD |= _BV(LEDSTROBE);
 
   for (uint32_t i = 0; i < 32 ; i++) {
     //read the current bit from the keyboard
-
     bbit = PIND & _BV(DATAPIN);
-    buttons |= ((unsigned long)bbit << i);
-    //send out corresponding LED update
-    PORTD |= _BV(CLOCKPIN);
+    if(bbit){
+	    buttons |= (1l << i);
+    }
+
+    PORTD |= _BV(CLOCKPIN); //clock high
+
     unsigned long mask = 1UL << i;
     if (leds & mask)
       PORTD &= ~(_BV(LEDDATA));
     else
       PORTD |= _BV(LEDDATA);
 
-    PORTD &= ~(_BV(CLOCKPIN));
+    PORTD &= ~(_BV(CLOCKPIN)); //clock LOW
 
   }
-  //  Serial.println();
 
   PORTD &= ~(_BV(LEDSTROBE));
 
